@@ -1,0 +1,102 @@
+<!DOCTYPE html> <html>
+<head>
+<meta charset="utf-8"> <script src="d3.js"></script> 
+<style>
+  .axis {
+        font-family: arial;
+        font-size:0.6em;
+    }
+    path {
+        fill:none;
+        stroke:black;
+        stroke-width:2px;
+    }
+    .tick {
+        fill:none;
+        stroke:black;
+    }
+    circle{
+        stroke:black;
+    }
+</style>
+<script>
+function draw(data){
+	var margin = 50,
+		width = 700 - margin,
+    height = 300 - margin;
+
+    var dateExtent = d3.extent(
+            data,
+            function(d){return new Date(d.date)}
+        );
+
+    var timeExtent = d3.extent(
+            data,
+            function(d){return new Date("T"+d.time)}
+        );
+
+    var timeScale = d3.time.scale()
+            .domain([new Date("T00:00:00"), new Date("T24:00:00")])
+            .range([height, margin]);
+        
+    var dateScale = d3.time.scale()
+        .domain(dateExtent)
+        .range([margin, width]);
+
+    var timeAxis = d3.svg.axis()
+            .scale(timeScale)
+            .orient("left");
+        
+    var dateAxis = d3.svg.axis()
+        .scale(dateScale);
+
+    
+    d3.select("body") 
+      .append("svg")
+        .attr("class","chart") 
+        .attr("width", width+margin)
+        .attr("height", height+margin);
+
+   	d3.select("svg")
+          .selectAll("circle")
+          .data(data)
+          .enter()
+          .append("circle")
+            .attr("cy", function(d){return timeScale(new Date("T"+d.time));})
+        	.attr("cx", function(d){return dateScale(new Date(d.date));})
+        	.attr("r", 0.5);
+
+    d3.select("svg")
+          .append("g")
+          .attr("class", "x axis")
+          .attr("transform", "translate(0," + height + ")")
+          .call(dateAxis);
+         
+        d3.select("svg")
+          .append("g")
+          .attr("class", "y axis")
+          .attr("transform", "translate(" + margin + ",0)")
+          .call(timeAxis);
+    
+      d3.select('.y.axis')
+          .append('text')
+          .text('Time axis')
+          .attr('transform', "rotate (90, " + -margin + ", 0)")
+          .attr('x', 20)
+          .attr('y', 0)
+                    
+      d3.select('.x.axis')
+        .append('text')
+          .text('time')
+          .attr('x', function(){return (width / 1.6) - margin})
+          .attr('y', margin/1.5)
+}
+
+</script> 
+</head>
+<body> 
+	<script>
+		d3.json("output.json", draw); 
+	</script>
+</body> 
+</html>
